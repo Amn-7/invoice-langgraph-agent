@@ -2,21 +2,6 @@
   "version": "1.0",
   "workflow_name": "InvoiceProcessing_v1",
   "description": "LangGraph invoice processing with HITL checkpoint/resume and Bigtool tool selection.",
-  "prompt_template": {
-    "name": "Langie",
-    "description": "Invoice Processing LangGraph Agent personality.",
-    "template": [
-      "You are Langie - the Invoice Processing LangGraph Agent.",
-      "You think in structured stages.",
-      "Each node is a well-defined processing phase.",
-      "You always carry forward state variables between nodes.",
-      "You know when to execute deterministic steps and when to choose dynamically.",
-      "You orchestrate MCP clients to call COMMON or ATLAS abilities as required.",
-      "You use Bigtool whenever a tool must be selected from a pool.",
-      "You log every decision, every tool choice, and every state update.",
-      "You always produce clean structured output."
-    ]
-  },
   "config": {
     "match_threshold": 0.9,
     "two_way_tolerance_pct": 5,
@@ -433,24 +418,5 @@
       ]
     }
   },
-  "notes": "Adjust config refs ({{...}}) to actual env var names. CheckpointNode will set `paused_reason` and produce `review_url`. HumanReviewNode must return a `resume_token` that LangGraph uses to resume execution.",
-  "ability_map": {
-    "accept_invoice_payload": "COMMON",
-    "parse_line_items": "COMMON",
-    "normalize_vendor": "COMMON",
-    "compute_flags": "COMMON",
-    "compute_match_score": "COMMON",
-    "build_accounting_entries": "COMMON",
-    "output_final_payload": "COMMON",
-    "ocr_extract": "ATLAS",
-    "enrich_vendor": "ATLAS",
-    "fetch_po": "ATLAS",
-    "fetch_grn": "ATLAS",
-    "fetch_history": "ATLAS",
-    "apply_invoice_approval_policy": "ATLAS",
-    "post_to_erp": "ATLAS",
-    "schedule_payment": "ATLAS",
-    "notify_vendor": "ATLAS",
-    "notify_finance_team": "ATLAS"
-  }
+  "notes": "Adjust config refs ({{...}}) to actual env var names. CheckpointNode will set `paused_reason` and produce `review_url`. HumanReviewNode must return a `resume_token` that LangGraph uses to resume execution."
 }
