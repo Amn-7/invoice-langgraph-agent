@@ -60,6 +60,40 @@
       <section class="panel">
         <div class="panel-header">
           <div>
+            <h2>Submit Invoice</h2>
+            <p class="muted">Paste invoice JSON to run the workflow and surface checkpoints.</p>
+          </div>
+          <div class="actions">
+            <button class="ghost" id="load-sample">Load Sample</button>
+            <button class="ghost" id="load-mismatch">Load Mismatch</button>
+          </div>
+        </div>
+
+        <form id="invoice-form" class="form">
+          <label>
+            <span>Invoice JSON</span>
+            <textarea
+              id="invoice-json"
+              class="code"
+              rows="10"
+              placeholder='{"invoice_id":"INV-1001"}'
+              required
+            ></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="primary">Run Invoice</button>
+            <button type="button" class="ghost" id="clear-invoice">Clear</button>
+          </div>
+        </form>
+
+        <div class="status" id="invoice-status"></div>
+        <div class="result" id="invoice-result"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
             <h2>Submit Decision</h2>
             <p class="muted">Accept to continue, reject for manual handling.</p>
           </div>

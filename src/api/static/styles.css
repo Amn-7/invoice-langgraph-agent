@@ -327,6 +327,12 @@ textarea {
   font-size: 14px;
 }
 
+textarea.code {
+  font-family: 'Courier New', monospace;
+  line-height: 1.4;
+  min-height: 220px;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: rgba(168, 192, 199, 0.7);
@@ -418,6 +424,12 @@ textarea::placeholder {
 .result.success {
   border-color: rgba(45, 212, 191, 0.6);
   color: #d7f7f1;
+}
+
+.result.warning {
+  border-color: rgba(240, 180, 41, 0.7);
+  background: rgba(240, 180, 41, 0.08);
+  color: #ffe8b5;
 }
 
 .result.error {

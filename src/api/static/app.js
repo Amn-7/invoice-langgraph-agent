@@ -13,9 +13,47 @@ const applyUrlBtn = document.getElementById('apply-url');
 const serverUrlLabel = document.getElementById('server-url');
 const pendingCount = document.getElementById('pending-count');
 const lastRefresh = document.getElementById('last-refresh');
+const invoiceForm = document.getElementById('invoice-form');
+const invoiceInput = document.getElementById('invoice-json');
+const invoiceStatus = document.getElementById('invoice-status');
+const invoiceResult = document.getElementById('invoice-result');
+const loadSampleBtn = document.getElementById('load-sample');
+const loadMismatchBtn = document.getElementById('load-mismatch');
+const clearInvoiceBtn = document.getElementById('clear-invoice');
 
 let baseUrl = window.location.origin;
 let selectedCheckpoint = '';
+
+const SAMPLE_INVOICE = {
+  invoice_id: 'INV-1001',
+  vendor_name: 'acme supplies',
+  vendor_tax_id: 'GST-112233',
+  invoice_date: '2024-05-01',
+  due_date: '2024-05-31',
+  amount: 12500.5,
+  currency: 'USD',
+  line_items: [
+    { desc: 'Paper', qty: 10, unit_price: 50, total: 500 },
+    { desc: 'Ink', qty: 5, unit_price: 200, total: 1000 },
+  ],
+  attachments: ['invoice_1001.pdf'],
+};
+
+const SAMPLE_MISMATCH = {
+  invoice_id: 'INV-1002',
+  vendor_name: 'acme supplies',
+  vendor_tax_id: 'GST-112233',
+  invoice_date: '2024-05-15',
+  due_date: '2024-06-15',
+  amount: 12500.5,
+  currency: 'USD',
+  po_amount: 9000,
+  line_items: [
+    { desc: 'Paper', qty: 10, unit_price: 50, total: 500 },
+    { desc: 'Ink', qty: 5, unit_price: 200, total: 1000 },
+  ],
+  attachments: ['invoice_1002.pdf'],
+};
 
 function setStatus(el, message, type = 'info') {
   if (!el) return;
@@ -32,6 +70,24 @@ function setDecisionResult(payload) {
   }
   if (payload.workflow_status === 'REQUIRES_MANUAL_HANDLING') {
     decisionResult.classList.add('error');
+  }
+}
+
+function setInvoiceResult(payload, type) {
+  if (!invoiceResult) return;
+  invoiceResult.textContent = payload ? JSON.stringify(payload, null, 2) : '';
+  invoiceResult.classList.remove('success', 'warning', 'error');
+  if (!payload) return;
+  if (type) {
+    invoiceResult.classList.add(type);
+    return;
+  }
+  if (payload.status === 'COMPLETED') {
+    invoiceResult.classList.add('success');
+  } else if (payload.status === 'PAUSED') {
+    invoiceResult.classList.add('warning');
+  } else if (payload.status === 'REQUIRES_MANUAL_HANDLING') {
+    invoiceResult.classList.add('error');
   }
 }
 
@@ -216,11 +272,56 @@ async function submitDecision(event) {
   }
 }
 
+async function submitInvoice(event) {
+  event.preventDefault();
+  setInvoiceResult('');
+  setStatus(invoiceStatus, 'Submitting invoice...');
+
+  let payload;
+  try {
+    payload = JSON.parse(invoiceInput.value);
+  } catch (err) {
+    setStatus(invoiceStatus, 'Invalid JSON payload.', 'error');
+    setInvoiceResult({ error: err.message }, 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}/invoice/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Submission failed');
+    }
+
+    const result = await response.json();
+    setStatus(invoiceStatus, `Workflow status: ${result.status}`);
+    setInvoiceResult(result);
+    if (result.status === 'PAUSED') {
+      fetchPending();
+    }
+  } catch (err) {
+    setStatus(invoiceStatus, `Error: ${err.message}`, 'error');
+    setInvoiceResult({ error: err.message }, 'error');
+  }
+}
+
 function applyBaseUrl() {
   const value = baseUrlInput.value.trim();
   baseUrl = value || window.location.origin;
   serverUrlLabel.textContent = baseUrl;
   fetchPending();
+}
+
+function loadInvoiceSample(sample, label) {
+  if (!invoiceInput) return;
+  invoiceInput.value = JSON.stringify(sample, null, 2);
+  setStatus(invoiceStatus, `${label} loaded.`);
+  setInvoiceResult('');
 }
 
 refreshBtn.addEventListener('click', fetchPending);
@@ -236,6 +337,29 @@ clearBtn.addEventListener('click', () => {
 });
 applyUrlBtn.addEventListener('click', applyBaseUrl);
 
+if (invoiceForm) {
+  invoiceForm.addEventListener('submit', submitInvoice);
+}
+if (loadSampleBtn) {
+  loadSampleBtn.addEventListener('click', () => loadInvoiceSample(SAMPLE_INVOICE, 'Sample invoice'));
+}
+if (loadMismatchBtn) {
+  loadMismatchBtn.addEventListener('click', () => loadInvoiceSample(SAMPLE_MISMATCH, 'Mismatch sample'));
+}
+if (clearInvoiceBtn) {
+  clearInvoiceBtn.addEventListener('click', () => {
+    if (invoiceInput) {
+      invoiceInput.value = '';
+    }
+    setInvoiceResult('');
+    setStatus(invoiceStatus, 'Invoice cleared.');
+  });
+}
+
 baseUrlInput.value = baseUrl;
 serverUrlLabel.textContent = baseUrl;
 fetchPending();
+
+if (invoiceInput) {
+  invoiceInput.value = JSON.stringify(SAMPLE_INVOICE, null, 2);
+}

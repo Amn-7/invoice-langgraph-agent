@@ -57,6 +57,11 @@ Human Review API
 - Open the basic frontend:
   http://localhost:8000/
 
+- Submit an invoice from the UI (optional) or via curl:
+  curl -X POST http://localhost:8000/invoice/submit \
+    -H "Content-Type: application/json" \
+    -d @data/sample_invoice.json
+
 - List pending:
   curl http://localhost:8000/human-review/pending
 

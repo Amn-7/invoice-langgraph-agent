@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -24,6 +24,14 @@ class DecisionResponse(BaseModel):
     resume_token: str
     next_stage: str
     workflow_status: Optional[str] = None
+
+
+class InvoiceSubmitResponse(BaseModel):
+    status: str
+    run_id: str
+    checkpoint: Optional[Dict[str, Any]] = None
+    final: Optional[Dict[str, Any]] = None
+    match: Optional[Dict[str, Any]] = None
 
 
 settings = load_settings()
@@ -69,6 +77,29 @@ async def record_decision(request: DecisionRequest) -> DecisionResponse:
         resume_token=resume_token,
         next_stage=next_stage,
         workflow_status=workflow_status,
+    )
+
+
+@app.post("/invoice/submit", response_model=InvoiceSubmitResponse)
+async def submit_invoice(payload: Dict[str, Any] = Body(...)) -> InvoiceSubmitResponse:
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="Invoice payload must be a JSON object.")
+
+    required = ["invoice_id", "vendor_name", "invoice_date", "amount", "currency"]
+    missing = [field for field in required if not payload.get(field)]
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing required fields: {', '.join(missing)}",
+        )
+
+    state = runner.run(payload)
+    return InvoiceSubmitResponse(
+        status=state.get("status", "UNKNOWN"),
+        run_id=state.get("run_id", ""),
+        checkpoint=state.get("checkpoint"),
+        final=state.get("final"),
+        match=state.get("match"),
     )
 
 
