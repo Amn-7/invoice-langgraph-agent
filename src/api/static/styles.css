@@ -17,6 +17,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: 'Source Sans 3', system-ui, sans-serif;
@@ -112,6 +116,7 @@ h1 {
   border-radius: 16px;
   padding: 18px;
   box-shadow: var(--shadow);
+  scroll-margin-top: 18px;
 }
 
 .panel.subtle {
@@ -375,6 +380,8 @@ textarea::placeholder {
   font-size: 13px;
   color: var(--muted);
   white-space: pre-wrap;
+  max-height: 260px;
+  overflow: auto;
 }
 
 .result.success {

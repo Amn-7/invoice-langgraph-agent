@@ -13,6 +13,7 @@ const applyUrlBtn = document.getElementById('apply-url');
 const serverUrlLabel = document.getElementById('server-url');
 const pendingCount = document.getElementById('pending-count');
 const lastRefresh = document.getElementById('last-refresh');
+const stepPending = document.getElementById('step-pending');
 const invoiceForm = document.getElementById('invoice-form');
 const invoiceInput = document.getElementById('invoice-json');
 const invoiceStatus = document.getElementById('invoice-status');
@@ -303,6 +304,9 @@ async function submitInvoice(event) {
     setInvoiceResult(result);
     if (result.status === 'PAUSED') {
       fetchPending();
+      if (stepPending) {
+        stepPending.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   } catch (err) {
     setStatus(invoiceStatus, `Error: ${err.message}`, 'error');
