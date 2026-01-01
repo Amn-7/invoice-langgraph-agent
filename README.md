@@ -77,6 +77,9 @@ Notes
 - Bigtool selection is deterministic based on payload context.
 - MCP clients in src/mcp are stub implementations (MCP integration is satisfied without real endpoints). Swap them for real servers when URLs/auth are provided.
 - Set `MCP_MODE=stub` in `.env` to keep stubs active; use real MCP URLs if provided.
+- /human-review/decision returns 404 for unknown checkpoint IDs and 409 if resume fails.
+- Bigtool selection is pluggable and stubbed in this demo; selections are logged and can route to real tools.
+- LibreSSL warning is just environment noise (doesn't affect the app).
 
 Artifacts
 - logs/demo_success.log: happy path run output
