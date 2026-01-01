@@ -16,6 +16,7 @@ Project Structure
 - configs/workflow.json: workflow definition (Appendix-1)
 - configs/tools.yaml: Bigtool pools
 - docs/architecture.md: architecture summary
+- docs/prompt.md: agent personality prompt template
 - src/core/config.py: config loader + env ref resolver
 - src/tools/bigtool.py: Bigtool picker
 - src/mcp/: COMMON/ATLAS client stubs + router
