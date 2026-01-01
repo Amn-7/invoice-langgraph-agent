@@ -5,6 +5,13 @@ Overview
 - Supports HITL checkpoints (pause/resume), MCP routing (COMMON/ATLAS), and Bigtool tool selection.
 - Includes a human-review FastAPI service and demo scripts.
 
+Getting Started (Quick Run)
+- python3 -m venv .venv
+- source .venv/bin/activate
+- pip install -r requirements.txt
+- cp .env.example .env
+- PYTHONPATH=. .venv/bin/python scripts/run_demo.py
+
 Project Structure
 - configs/workflow.json: workflow definition (Appendix-1)
 - configs/tools.yaml: Bigtool pools
