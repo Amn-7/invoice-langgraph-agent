@@ -58,25 +58,26 @@ async def record_decision(request: DecisionRequest) -> DecisionResponse:
     if decision not in {"ACCEPT", "REJECT"}:
         raise HTTPException(status_code=400, detail="decision must be ACCEPT or REJECT")
 
-    resume_token, next_stage = save_human_decision(
-        settings.env.get("DB_CONN", "sqlite:///./data/demo.db"),
-        request.checkpoint_id,
-        decision,
-        request.notes,
-        request.reviewer_id,
-    )
+    try:
+        resume_token, next_stage = save_human_decision(
+            settings.env.get("DB_CONN", "sqlite:///./data/demo.db"),
+            request.checkpoint_id,
+            decision,
+            request.notes,
+            request.reviewer_id,
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
-    workflow_status: Optional[str] = None
     try:
         state = runner.resume_from_checkpoint(request.checkpoint_id)
-        workflow_status = state.get("status")
-    except Exception:
-        workflow_status = None
+    except Exception as exc:
+        raise HTTPException(status_code=409, detail=f"Resume failed: {exc}") from exc
 
     return DecisionResponse(
         resume_token=resume_token,
         next_stage=next_stage,
-        workflow_status=workflow_status,
+        workflow_status=state.get("status"),
     )
 
 

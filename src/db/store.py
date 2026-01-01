@@ -269,6 +269,16 @@ def save_human_decision(
     next_stage = "RECONCILE" if decision == "ACCEPT" else "MANUAL_HANDOFF"
 
     conn = _connect(db_conn)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute(
+        """
+        SELECT checkpoint_id FROM checkpoints WHERE checkpoint_id = ?
+        """,
+        (checkpoint_id,),
+    ).fetchone()
+    if not row:
+        conn.close()
+        raise KeyError(f"Checkpoint '{checkpoint_id}' not found.")
     with conn:
         conn.execute(
             """

@@ -64,6 +64,17 @@ def _extract_context(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _db_tool_from_conn(db_conn: str) -> Optional[str]:
+    lowered = db_conn.lower()
+    if lowered.startswith("sqlite"):
+        return "sqlite"
+    if lowered.startswith("postgres") or "postgres" in lowered:
+        return "postgres"
+    if "dynamodb" in lowered:
+        return "dynamodb"
+    return None
+
+
 def _get_first_amount(items: List[Dict[str, Any]]) -> Optional[float]:
     if not items:
         return None
@@ -299,9 +310,13 @@ class InvoiceNodes:
             return {"status": state.get("status", ""), "logs": state.get("logs", [])}
 
         payload = state.get("input_payload", {})
+        db_context = _extract_context(payload)
+        db_tool = _db_tool_from_conn(self.deps.db_conn)
+        if db_tool:
+            db_context["preferred_tool"] = db_tool
         selection = self.deps.bigtool.select(
             "db",
-            context=_extract_context(payload),
+            context=db_context,
             pool_hint=["postgres", "sqlite", "dynamodb"],
         )
 
@@ -471,9 +486,13 @@ class InvoiceNodes:
 
     def complete(self, state: InvoiceState) -> InvoiceState:
         payload = state.get("input_payload", {})
+        db_context = _extract_context(payload)
+        db_tool = _db_tool_from_conn(self.deps.db_conn)
+        if db_tool:
+            db_context["preferred_tool"] = db_tool
         selection = self.deps.bigtool.select(
             "db",
-            context=_extract_context(payload),
+            context=db_context,
             pool_hint=["postgres", "sqlite", "dynamodb"],
         )
         final_status = "COMPLETED"

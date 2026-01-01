@@ -25,13 +25,17 @@ def main() -> None:
     notes = sys.argv[4] if len(sys.argv) > 4 else ""
 
     settings = load_settings()
-    save_human_decision(
-        settings.env.get("DB_CONN", "sqlite:///./data/demo.db"),
-        checkpoint_id,
-        decision,
-        notes,
-        reviewer_id,
-    )
+    try:
+        save_human_decision(
+            settings.env.get("DB_CONN", "sqlite:///./data/demo.db"),
+            checkpoint_id,
+            decision,
+            notes,
+            reviewer_id,
+        )
+    except KeyError as exc:
+        print(f"[red]Checkpoint not found:[/red] {exc}")
+        raise SystemExit(1)
 
     runner = WorkflowRunner(settings)
     state = runner.resume_from_checkpoint(checkpoint_id)
