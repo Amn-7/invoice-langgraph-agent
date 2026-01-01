@@ -58,7 +58,7 @@ const SAMPLE_MISMATCH = {
 function setStatus(el, message, type = 'info') {
   if (!el) return;
   el.textContent = message;
-  el.style.color = type === 'error' ? '#f4725b' : '#a8c0c7';
+  el.style.color = type === 'error' ? '#e11d48' : '#5f6b7a';
 }
 
 function setDecisionResult(payload) {

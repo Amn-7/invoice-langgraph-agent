@@ -3,153 +3,142 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Invoice Review Console</title>
+    <title>Invoice Review Desk</title>
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <div class="bg-orb orb-a"></div>
-    <div class="bg-orb orb-b"></div>
+    <div class="page">
+      <header class="hero">
+        <p class="kicker">Invoice Processing</p>
+        <h1>Human Review Desk</h1>
+        <p class="lead">
+          Run an invoice, check if it needs review, then approve or reject it. This page is built for
+          simple, step-by-step use.
+        </p>
+        <div class="summary">
+          <div class="summary-card">
+            <span class="summary-label">Server</span>
+            <span class="summary-value" id="server-url">http://localhost:8000</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-label">Pending Reviews</span>
+            <span class="summary-value" id="pending-count">0</span>
+            <span class="summary-meta" id="last-refresh">Last refresh: -</span>
+          </div>
+        </div>
+      </header>
 
-    <header class="site-header">
-      <div class="brand">
-        <p class="eyebrow">LangGraph HITL</p>
-        <h1>Invoice Review Console</h1>
-        <p class="subtitle">Review checkpoints, approve or reject, and resume workflows without leaving the queue.</p>
-        <div class="chip-row">
-          <span class="chip">COMMON</span>
-          <span class="chip">ATLAS</span>
-          <span class="chip">Bigtool</span>
-          <span class="chip">Checkpoints</span>
-        </div>
-      </div>
-      <div class="header-aside">
-        <div class="meta-card">
-          <div>
-            <p class="label">Environment</p>
-            <p class="value">Local Demo</p>
+      <main class="steps">
+        <section class="panel">
+          <div class="step-header">
+            <span class="step-badge">Step 1</span>
+            <h2>Run an Invoice</h2>
           </div>
-          <div>
-            <p class="label">Server</p>
-            <p class="value" id="server-url">http://localhost:8000</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <p class="label">Pending</p>
-          <p class="value" id="pending-count">0</p>
-          <p class="caption" id="last-refresh">Last refresh: -</p>
-        </div>
-      </div>
-    </header>
-
-    <main class="layout">
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>Pending Reviews</h2>
-            <p class="muted">Pulls from the human review queue in real time.</p>
-          </div>
+          <p class="muted">
+            Paste invoice JSON or use a sample. If matching fails, a review task appears in Step 2.
+          </p>
           <div class="actions">
-            <button class="ghost" id="refresh-btn">Refresh</button>
+            <button class="ghost" id="load-sample" type="button">Load Sample (Match)</button>
+            <button class="ghost" id="load-mismatch" type="button">Load Sample (Mismatch)</button>
           </div>
-        </div>
 
-        <div class="status" id="pending-status"></div>
-        <div class="list" id="pending-list"></div>
-      </section>
+          <form id="invoice-form" class="form">
+            <label>
+              <span>Invoice JSON</span>
+              <textarea
+                id="invoice-json"
+                class="code"
+                rows="10"
+                placeholder='{"invoice_id":"INV-1001"}'
+                required
+              ></textarea>
+            </label>
 
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>Submit Invoice</h2>
-            <p class="muted">Paste invoice JSON to run the workflow and surface checkpoints.</p>
-          </div>
-          <div class="actions">
-            <button class="ghost" id="load-sample">Load Sample</button>
-            <button class="ghost" id="load-mismatch">Load Mismatch</button>
-          </div>
-        </div>
-
-        <form id="invoice-form" class="form">
-          <label>
-            <span>Invoice JSON</span>
-            <textarea
-              id="invoice-json"
-              class="code"
-              rows="10"
-              placeholder='{"invoice_id":"INV-1001"}'
-              required
-            ></textarea>
-          </label>
-
-          <div class="form-actions">
-            <button type="submit" class="primary">Run Invoice</button>
-            <button type="button" class="ghost" id="clear-invoice">Clear</button>
-          </div>
-        </form>
-
-        <div class="status" id="invoice-status"></div>
-        <div class="result" id="invoice-result"></div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>Submit Decision</h2>
-            <p class="muted">Accept to continue, reject for manual handling.</p>
-          </div>
-        </div>
-
-        <form id="decision-form" class="form">
-          <label>
-            <span>Checkpoint ID</span>
-            <input type="text" id="checkpoint-id" placeholder="chk_xxx" required />
-          </label>
-
-          <label>
-            <span>Reviewer ID</span>
-            <input type="text" id="reviewer-id" placeholder="reviewer_1" required />
-          </label>
-
-          <fieldset class="decision">
-            <legend>Decision</legend>
-            <div class="decision-toggle">
-              <label class="decision-option accept">
-                <input type="radio" name="decision" value="ACCEPT" checked />
-                <span>Accept</span>
-              </label>
-              <label class="decision-option reject">
-                <input type="radio" name="decision" value="REJECT" />
-                <span>Reject</span>
-              </label>
+            <div class="form-actions">
+              <button type="submit" class="primary">Run Invoice</button>
+              <button type="button" class="ghost" id="clear-invoice">Clear</button>
             </div>
-          </fieldset>
+          </form>
 
-          <label>
-            <span>Notes</span>
-            <textarea id="notes" rows="3" placeholder="Optional notes"></textarea>
-          </label>
+          <div class="status" id="invoice-status"></div>
+          <div class="result" id="invoice-result"></div>
+        </section>
 
-          <div class="form-actions">
-            <button type="submit" class="primary">Submit Decision</button>
-            <button type="button" class="ghost" id="clear-btn">Clear</button>
+        <section class="panel">
+          <div class="step-header">
+            <span class="step-badge">Step 2</span>
+            <h2>Pending Reviews</h2>
           </div>
-        </form>
+          <p class="muted">Only invoices that fail matching show up here.</p>
+          <div class="actions">
+            <button class="ghost" id="refresh-btn" type="button">Refresh List</button>
+          </div>
 
-        <div class="status" id="decision-status"></div>
-        <div class="result" id="decision-result"></div>
-      </section>
-    </main>
+          <div class="status" id="pending-status"></div>
+          <div class="list" id="pending-list"></div>
+        </section>
 
-    <section class="panel footer">
-      <div>
-        <h3>Connection</h3>
-        <p class="muted">Override the API base URL if your server runs elsewhere.</p>
-      </div>
-      <div class="inline-form">
-        <input type="text" id="base-url" placeholder="http://localhost:8000" />
-        <button class="ghost" id="apply-url">Apply</button>
-      </div>
-    </section>
+        <section class="panel">
+          <div class="step-header">
+            <span class="step-badge">Step 3</span>
+            <h2>Approve or Reject</h2>
+          </div>
+          <p class="muted">Select a pending item, then choose Accept or Reject.</p>
+          <p class="tip">Tip: Click "Use ID" on a pending card to autofill.</p>
+
+          <form id="decision-form" class="form">
+            <label>
+              <span>Checkpoint ID</span>
+              <input type="text" id="checkpoint-id" placeholder="chk_xxx" required />
+            </label>
+
+            <label>
+              <span>Reviewer ID</span>
+              <input type="text" id="reviewer-id" placeholder="reviewer_1" required />
+            </label>
+
+            <fieldset class="decision">
+              <legend>Decision</legend>
+              <div class="decision-toggle">
+                <label class="decision-option accept">
+                  <input type="radio" name="decision" value="ACCEPT" checked />
+                  <span>Accept</span>
+                </label>
+                <label class="decision-option reject">
+                  <input type="radio" name="decision" value="REJECT" />
+                  <span>Reject</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <label>
+              <span>Notes</span>
+              <textarea id="notes" rows="3" placeholder="Optional notes"></textarea>
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" class="primary">Submit Decision</button>
+              <button type="button" class="ghost" id="clear-btn">Clear</button>
+            </div>
+          </form>
+
+          <div class="status" id="decision-status"></div>
+          <div class="result" id="decision-result"></div>
+        </section>
+
+        <section class="panel subtle">
+          <div class="step-header">
+            <span class="step-badge">Optional</span>
+            <h2>Connection</h2>
+          </div>
+          <p class="muted">Change the API base URL if your server runs elsewhere.</p>
+          <div class="inline-form">
+            <input type="text" id="base-url" placeholder="http://localhost:8000" />
+            <button class="ghost" id="apply-url" type="button">Apply</button>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <script src="/static/app.js"></script>
   </body>
