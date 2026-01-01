@@ -10,6 +10,7 @@ from src.db import (
     get_checkpoint_status,
     load_checkpoint,
     save_checkpoint,
+    save_final_result,
     save_human_decision,
     save_raw_invoice,
 )
@@ -495,15 +496,32 @@ class InvoiceNodes:
             "output_final_payload",
             {"final_payload": final_payload, "status": final_status},
         )
+        final_payload_result = result.get("final_payload", final_payload)
+        run_id = state.get("run_id")
+        if run_id:
+            save_final_result(
+                self.deps.db_conn,
+                run_id,
+                payload,
+                final_status,
+                final_payload_result,
+            )
 
         audit_log = list(state.get("logs", []))
 
         logs = _append_log(state, "COMPLETE", "bigtool.select", _tool_log(selection))
         logs = _append_log(logs, "COMPLETE", "ability", result)
+        if run_id:
+            logs = _append_log(
+                logs,
+                "COMPLETE",
+                "persist_final",
+                {"run_id": run_id, "stored": True},
+            )
 
         return {
             "final": {
-                "final_payload": result.get("final_payload", final_payload),
+                "final_payload": final_payload_result,
                 "audit_log": audit_log,
                 "status": final_status,
             },

@@ -87,6 +87,21 @@ def init_db(db_conn: str) -> None:
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS final_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                invoice_id TEXT,
+                vendor_name TEXT,
+                amount REAL,
+                currency TEXT,
+                status TEXT,
+                final_payload TEXT NOT NULL
+            )
+            """
+        )
     conn.close()
 
 
@@ -119,6 +134,42 @@ def save_raw_invoice(
                 amount,
                 currency,
                 attachments,
+                payload_blob,
+            ),
+        )
+    conn.close()
+
+
+def save_final_result(
+    db_conn: str,
+    run_id: str,
+    payload: Dict[str, Any],
+    status: str,
+    final_payload: Dict[str, Any],
+) -> None:
+    init_db(db_conn)
+    invoice_id = payload.get("invoice_id")
+    vendor_name = payload.get("vendor_name")
+    amount = payload.get("amount")
+    currency = payload.get("currency")
+    payload_blob = json.dumps(final_payload)
+    conn = _connect(db_conn)
+    with conn:
+        conn.execute(
+            """
+            INSERT INTO final_results (
+                run_id, created_at, invoice_id, vendor_name,
+                amount, currency, status, final_payload
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                run_id,
+                _utc_now(),
+                invoice_id,
+                vendor_name,
+                amount,
+                currency,
+                status,
                 payload_blob,
             ),
         )
