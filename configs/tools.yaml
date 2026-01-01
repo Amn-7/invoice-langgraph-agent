@@ -1,0 +1,7 @@
+pools:
+  storage: [s3, gcs, local_fs]
+  ocr: [google_vision, tesseract, aws_textract]
+  enrichment: [clearbit, people_data_labs, vendor_db]
+  erp_connector: [sap_sandbox, netsuite, mock_erp]
+  db: [postgres, sqlite, dynamodb]
+  email: [sendgrid, smartlead, ses]

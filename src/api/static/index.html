@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Invoice Review Console</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+
+    <header class="site-header">
+      <div class="brand">
+        <p class="eyebrow">LangGraph HITL</p>
+        <h1>Invoice Review Console</h1>
+        <p class="subtitle">Review checkpoints, approve or reject, and resume workflows without leaving the queue.</p>
+        <div class="chip-row">
+          <span class="chip">COMMON</span>
+          <span class="chip">ATLAS</span>
+          <span class="chip">Bigtool</span>
+          <span class="chip">Checkpoints</span>
+        </div>
+      </div>
+      <div class="header-aside">
+        <div class="meta-card">
+          <div>
+            <p class="label">Environment</p>
+            <p class="value">Local Demo</p>
+          </div>
+          <div>
+            <p class="label">Server</p>
+            <p class="value" id="server-url">http://localhost:8000</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <p class="label">Pending</p>
+          <p class="value" id="pending-count">0</p>
+          <p class="caption" id="last-refresh">Last refresh: -</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Pending Reviews</h2>
+            <p class="muted">Pulls from the human review queue in real time.</p>
+          </div>
+          <div class="actions">
+            <button class="ghost" id="refresh-btn">Refresh</button>
+          </div>
+        </div>
+
+        <div class="status" id="pending-status"></div>
+        <div class="list" id="pending-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Submit Decision</h2>
+            <p class="muted">Accept to continue, reject for manual handling.</p>
+          </div>
+        </div>
+
+        <form id="decision-form" class="form">
+          <label>
+            <span>Checkpoint ID</span>
+            <input type="text" id="checkpoint-id" placeholder="chk_xxx" required />
+          </label>
+
+          <label>
+            <span>Reviewer ID</span>
+            <input type="text" id="reviewer-id" placeholder="reviewer_1" required />
+          </label>
+
+          <fieldset class="decision">
+            <legend>Decision</legend>
+            <div class="decision-toggle">
+              <label class="decision-option accept">
+                <input type="radio" name="decision" value="ACCEPT" checked />
+                <span>Accept</span>
+              </label>
+              <label class="decision-option reject">
+                <input type="radio" name="decision" value="REJECT" />
+                <span>Reject</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label>
+            <span>Notes</span>
+            <textarea id="notes" rows="3" placeholder="Optional notes"></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="primary">Submit Decision</button>
+            <button type="button" class="ghost" id="clear-btn">Clear</button>
+          </div>
+        </form>
+
+        <div class="status" id="decision-status"></div>
+        <div class="result" id="decision-result"></div>
+      </section>
+    </main>
+
+    <section class="panel footer">
+      <div>
+        <h3>Connection</h3>
+        <p class="muted">Override the API base URL if your server runs elsewhere.</p>
+      </div>
+      <div class="inline-form">
+        <input type="text" id="base-url" placeholder="http://localhost:8000" />
+        <button class="ghost" id="apply-url">Apply</button>
+      </div>
+    </section>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
