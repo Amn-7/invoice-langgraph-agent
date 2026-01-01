@@ -313,3 +313,20 @@ def get_checkpoint_status(db_conn: str, checkpoint_id: str) -> Dict[str, Any]:
     if not row:
         raise KeyError(f"Checkpoint '{checkpoint_id}' not found.")
     return dict(row)
+
+
+def list_final_results(db_conn: str, limit: int = 20) -> List[Dict[str, Any]]:
+    init_db(db_conn)
+    conn = _connect(db_conn)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        """
+        SELECT run_id, invoice_id, vendor_name, amount, currency, status, created_at
+        FROM final_results
+        ORDER BY created_at DESC
+        LIMIT ?
+        """,
+        (int(limit),),
+    ).fetchall()
+    conn.close()
+    return [dict(row) for row in rows]

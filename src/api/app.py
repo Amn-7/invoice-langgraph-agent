@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from src.core.config import load_settings
-from src.db import list_pending_reviews, save_human_decision
+from src.db import list_final_results, list_pending_reviews, save_human_decision
 from src.core.workflow import WorkflowRunner
 
 
@@ -114,3 +114,9 @@ async def decision_help() -> Dict[str, Any]:
             "reviewer_id": "reviewer_1",
         },
     }
+
+
+@app.get("/final-results")
+async def get_final_results(limit: int = 20) -> Dict[str, Any]:
+    items = list_final_results(settings.env.get("DB_CONN", "sqlite:///./data/demo.db"), limit=limit)
+    return {"items": items}

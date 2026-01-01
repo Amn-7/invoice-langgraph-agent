@@ -14,6 +14,9 @@ const serverUrlLabel = document.getElementById('server-url');
 const pendingCount = document.getElementById('pending-count');
 const lastRefresh = document.getElementById('last-refresh');
 const stepPending = document.getElementById('step-pending');
+const finalRefreshBtn = document.getElementById('final-refresh');
+const finalStatus = document.getElementById('final-status');
+const finalList = document.getElementById('final-list');
 const invoiceForm = document.getElementById('invoice-form');
 const invoiceInput = document.getElementById('invoice-json');
 const invoiceStatus = document.getElementById('invoice-status');
@@ -212,6 +215,51 @@ function renderList(items) {
   highlightSelected();
 }
 
+function renderFinalResults(items) {
+  if (!finalList) return;
+  finalList.innerHTML = '';
+  if (!items.length) {
+    finalList.innerHTML = '<div class="card">No final results yet.</div>';
+    return;
+  }
+
+  items.forEach((item) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const top = document.createElement('div');
+    top.className = 'card-top';
+
+    const heading = document.createElement('div');
+    const title = document.createElement('h4');
+    title.textContent = item.vendor_name || 'Unknown vendor';
+    const tiny = document.createElement('p');
+    tiny.className = 'tiny';
+    tiny.textContent = `Invoice: ${item.invoice_id || '-'}`;
+    heading.appendChild(title);
+    heading.appendChild(tiny);
+
+    const badge = document.createElement('div');
+    badge.className = 'badge';
+    badge.textContent = item.status || 'UNKNOWN';
+
+    top.appendChild(heading);
+    top.appendChild(badge);
+
+    const meta = document.createElement('div');
+    meta.className = 'card-meta';
+    meta.innerHTML = `
+      <div>Amount: ${formatAmount(item.amount)}</div>
+      <div>Currency: ${item.currency || '-'}</div>
+      <div>Created: ${formatDate(item.created_at)}</div>
+    `;
+
+    card.appendChild(top);
+    card.appendChild(meta);
+    finalList.appendChild(card);
+  });
+}
+
 async function fetchPending() {
   setStatus(pendingStatus, 'Loading pending reviews...');
   try {
@@ -231,6 +279,23 @@ async function fetchPending() {
     renderList(items);
   } catch (err) {
     setStatus(pendingStatus, `Error: ${err.message}`, 'error');
+  }
+}
+
+async function fetchFinalResults() {
+  if (!finalList) return;
+  setStatus(finalStatus, 'Loading final results...');
+  try {
+    const response = await fetch(`${baseUrl}/final-results`);
+    if (!response.ok) {
+      throw new Error(`Request failed with ${response.status}`);
+    }
+    const payload = await response.json();
+    const items = payload.items || [];
+    setStatus(finalStatus, `Found ${items.length} result(s).`);
+    renderFinalResults(items);
+  } catch (err) {
+    setStatus(finalStatus, `Error: ${err.message}`, 'error');
   }
 }
 
@@ -330,6 +395,9 @@ function loadInvoiceSample(sample, label) {
 
 refreshBtn.addEventListener('click', fetchPending);
 decisionForm.addEventListener('submit', submitDecision);
+if (finalRefreshBtn) {
+  finalRefreshBtn.addEventListener('click', fetchFinalResults);
+}
 clearBtn.addEventListener('click', () => {
   checkpointInput.value = '';
   reviewerInput.value = '';
@@ -363,6 +431,7 @@ if (clearInvoiceBtn) {
 baseUrlInput.value = baseUrl;
 serverUrlLabel.textContent = baseUrl;
 fetchPending();
+fetchFinalResults();
 
 if (invoiceInput) {
   invoiceInput.value = JSON.stringify(SAMPLE_INVOICE, null, 2);
