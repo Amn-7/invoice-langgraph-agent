@@ -226,6 +226,12 @@ function renderFinalResults(items) {
   items.forEach((item) => {
     const card = document.createElement('div');
     card.className = 'card';
+    if (item.status === 'COMPLETED') {
+      card.classList.add('success');
+    }
+    if (item.status === 'REQUIRES_MANUAL_HANDLING') {
+      card.classList.add('danger');
+    }
 
     const top = document.createElement('div');
     top.className = 'card-top';
